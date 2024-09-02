@@ -11,6 +11,11 @@ const SignUp = ({ navigation }) => {
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const db = firestore();
+
+    // const signInAnonymously = async () => {
+    //     await firebase.auth().signInAnonymously();
+    // }
+
     // PushNotification - Start
     const [fcmToken, setFcmToken] = useState(null);
 
@@ -29,6 +34,7 @@ const SignUp = ({ navigation }) => {
 
     useEffect(() => {
         checkFcm();
+        // signInAnonymously(); //signINAnnonymously
     }, []);
     // PushNotification - End
 

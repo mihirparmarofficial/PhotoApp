@@ -5,10 +5,10 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
 
-//react {
-//    def enableProguardInReleaseBuilds = false
-//    def jscFlavor = 'org.webkit:android-jsc:+'
-//}
+react {
+    def enableProguardInReleaseBuilds = false
+    def jscFlavor = 'org.webkit:android-jsc:+'
+}
 
 android {
     ndkVersion rootProject.ext.ndkVersion
@@ -22,6 +22,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        missingDimensionStrategy 'react-native-camera', 'general' //for camera 
     }
     signingConfigs {
         debug {
@@ -38,7 +39,7 @@ android {
         release {
             signingConfig signingConfigs.debug
             minifyEnabled true
-            // enableProguardInReleaseBuilds
+            // enableProguardInReleaseBuild
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
@@ -46,7 +47,7 @@ android {
 
 dependencies {
     implementation("com.facebook.react:react-android")
-    implementation 'com.google.firebase:firebase-messaging:24.0.0'
+    implementation 'com.google.firebase:firebase-messaging:24.0.1'
     implementation 'com.android.support:support-annotations:28.0.0'
       implementation(project(':react-native-onesignal')){
       exclude group: 'com.google.android.gms'

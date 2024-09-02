@@ -32,6 +32,7 @@ const LogIn = () => {
     }, []);
     // PushNotification - End
     const handleSignin = async () => {
+
         try {
             if (email.length > 0 && password.length > 0) {
                 const user = await auth().signInWithEmailAndPassword(email, password);

@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, Image, ScrollView, FlatList, Platform } from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, FlatList, Platform, Alert, StyleSheet, Image, } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
 import { RFValue } from 'react-native-responsive-fontsize';
 import storage from '@react-native-firebase/storage';
+import { utils } from '@react-native-firebase/app';
 
 const FileUpload = () => {
     const [fileData, setFileData] = useState([]);
+    const [uploading, setUploading] = useState(false);
+    const [transferred, setTransferred] = useState(0);
 
-    // Function to select multiple files
     const selectDocs = async () => {
         try {
             const results = await DocumentPicker.pick({
                 type: [DocumentPicker.types.images],
-                allowMultiSelection: true
+                copyTo: 'cachesDirectory',
             });
             console.log(results);
             setFileData(results);
@@ -25,47 +27,65 @@ const FileUpload = () => {
         }
     };
 
-    // Function to upload selected files
     const uploadDocs = async () => {
-        if (fileData.length === 0) {
-            console.log("No files selected");
-            return;
-        }
+        // for (const file of fileData) {
+        //     const { uri } = file;
+        //     const filename = uri.substring(uri.lastIndexOf('/') + 1);
+        //     let uploadUri = uri;
 
+        //     if (Platform.OS === 'android') {
+        //         try {
+        //             const uriComponents = uri.split('/');
+        //             const fileName = uriComponents[uriComponents.length - 1];
+        //             const newUri = `${DocumentDirectoryPath}/${fileName}`;
+        //             const fileCopy = await RNFS.copyFile(uri, newUri);
+        //             uploadUri = newUri;
+        //         } catch (error) {
+        //             console.log('Error copying file:', error);
+        //             return;
+        //         }
+        //     }
+        //     setUploading(true);
+        //     setTransferred(0);
+        //     const task = storage().ref(filename).putFile(uploadUri);
+        //     task.on('state_changed', snapshot => {
+        //         setTransferred(
+        //             Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+        //         );
+        //     });
+        //     try {
+        //         await task;
+        //     } catch (e) {
+        //         console.error(e);
+        // }
+        // }
+        // setUploading(false);
+        // Alert.alert(
+        //     'Upload Complete!',
+        //     'Your files have been uploaded to Firebase Cloud Storage!'
+        // );
+        // setFileData([]);
+
+        const pathToFile = fileData[0].fileCopyUri;
+        // const pathToFile = `${utils.FilePath.PICTURES_DIRECTORY}/black-t-shirt-sm.png`;
         try {
-            const uploadTasks = fileData.map(async file => {
-                const { uri, name } = file;
-                const uploadUri = Platform.OS === 'ios' ? uri.replace('file://', '') : uri;
-                const reference = storage().ref(`/uploads/${name}`);
-                const task = reference.putFile(uploadUri);
-
-                return new Promise((resolve, reject) => {
-                    task.on('state_changed',
-                        taskSnapshot => {
-                            console.log(`${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`);
-                        },
-                        reject, // Handle errors here
-                        async () => {
-                            const downloadUrl = await reference.getDownloadURL();
-                            resolve(downloadUrl);
-                        }
-                    );
-                });
+            const task = storage().ref(`/uploads/${fileData[0].name}`).putFile(pathToFile);
+            //  await storage().ref(fileData[0].name).putFile(pathToFile);
+            task.on('state_changed', snapshot => {
+                console.log(`Uploading ${Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)} % done !`)
+                setFileData([])
             });
-
-            const downloadUrls = await Promise.all(uploadTasks);
-            console.log('All files uploaded successfully:', downloadUrls);
-            setFileData([]);
         } catch (error) {
-            console.error('File upload error: ', error);
+            console.log('error----> ', error)
         }
+
     };
 
-    // Function to render selected files
     const renderItem = ({ item }) => (
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: RFValue(10) }}>
-            <Image source={{ uri: item.uri }} style={{ height: RFValue(50), width: RFValue(50), marginRight: RFValue(10) }} />
-            <Text>{item.name}</Text>
+        <View style={{ padding: RFValue(10), borderBottomWidth: 1, borderColor: '#ccc', flexDirection: 'row', height: 'auto', }}>
+            <Image style={{ height: 50, width: 50 }} source={{ uri: item.fileCopyUri }}></Image>
+            <View style={{ paddingLeft: 10, justifyContent: 'center' }}>
+                <Text style={{ fontSize: 16, color: 'black' }}>{item.name}</Text></View>
         </View>
     );
 
@@ -76,11 +96,9 @@ const FileUpload = () => {
             </View>
             <View style={{ alignItems: 'center', marginVertical: RFValue(10) }}>
                 <TouchableOpacity
-                    style={{ borderWidth: RFValue(1.5), borderColor: 'black', borderRadius: RFValue(10), width: '80%' }}
+                    style={styles.btn}
                     onPress={selectDocs}>
-                    <View style={{ alignItems: 'center', justifyContent: 'center', padding: RFValue(10) }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: RFValue(17), color: 'black' }}>Select Files</Text>
-                    </View>
+                    <Text style={styles.txt}>Select Files</Text>
                 </TouchableOpacity>
             </View>
             <View style={{ flex: 1 }}>
@@ -99,22 +117,23 @@ const FileUpload = () => {
             </View>
             <View style={{ alignItems: 'center', marginVertical: RFValue(20) }}>
                 <TouchableOpacity
-                    style={{ borderWidth: RFValue(1.5), borderColor: 'black', borderRadius: RFValue(10), width: '80%' }}
+                    style={styles.btn}
                     onPress={uploadDocs}>
-                    <View style={{ alignItems: 'center', justifyContent: 'center', padding: RFValue(10) }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: RFValue(17), color: 'black' }}>Upload Files</Text>
-                    </View>
+                    <Text style={styles.txt}>Upload Files</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
     );
 };
 
+const styles = StyleSheet.create({
+    btn: {
+        borderWidth: 1.5, borderColor: 'black', borderRadius: 10, width: '93%', height: 45, alignItems: 'center', justifyContent: 'center', padding: 5
+    },
+    txt: {
+        fontWeight: '700', fontSize: 25, color: 'black'
+    },
+})
+
 export default FileUpload;
-
-
-
-
-
-
 

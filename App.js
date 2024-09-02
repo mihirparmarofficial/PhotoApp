@@ -23,6 +23,7 @@ import SplashScreen from './screens/SplashScreen';
 import HomeScreen from './screens/HomeScreen';
 import Crash from './screens/Crash';
 import Map from './screens/Map';
+import MapDirections from './screens/MapDirections';
 
 const Stack = createStackNavigator();
 
@@ -46,7 +47,7 @@ const App = () => {
 
   const getDeviceToken = async () => {
     try {
-      await messaging().registerDeviceForRemoteMessages();
+      // await messaging().registerDeviceForRemoteMessages();
       await messaging()
         .getToken()
         .then(token => {
@@ -104,16 +105,10 @@ const App = () => {
     }
   };
 
-
-
-
-
-
-
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName='Map'
+        initialRouteName='SplashScreen'
         screenOptions={{
           headerShown: false,
         }}>
@@ -125,6 +120,7 @@ const App = () => {
         <Stack.Screen name='HomeScreen' component={HomeScreen} />
         <Stack.Screen name='Crash' component={Crash} />
         <Stack.Screen name='Map' component={Map} />
+        <Stack.Screen name='MapDirections' component={MapDirections} />
       </Stack.Navigator>
     </NavigationContainer>
   );
