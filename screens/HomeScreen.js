@@ -43,14 +43,14 @@ const HomeScreen = ({ navigation }) => {
                             <Text style={styles.txt}>Map Directions</Text>
                         </View>
                     </TouchableOpacity>
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={styles.btn}
                         onPress={() => navigation.navigate('Camera')}
                     >
                         <View style={{ alignItems: 'center', justifyContent: 'center', padding: 5 }}>
                             <Text style={styles.txt}>Camera</Text>
                         </View>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                     <TouchableOpacity
                         style={{ borderWidth: 1.5, borderColor: 'red', borderRadius: 10, width: '93%', height: 45, alignItems: 'center', justifyContent: 'center', marginTop: 20 }}
                         onPress={async () => {
